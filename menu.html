@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Almas Oscuras — Menú</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="screen-menu">
+
+  <canvas id="particles-canvas"></canvas>
+
+  <div class="menu-container">
+    <div class="gothic-frame">
+      <span class="corner tl">✦</span>
+      <span class="corner tr">✦</span>
+      <span class="corner bl">✦</span>
+      <span class="corner br">✦</span>
+
+      <!-- Vista: Menú principal -->
+      <div id="view-main" class="view active">
+        <h1 class="game-title small">Almas Oscuras</h1>
+        <div class="title-divider"></div>
+        <button class="menu-btn" onclick="showView('new-game')">Nuevo Juego</button>
+        <button class="menu-btn" onclick="showView('credits')">Créditos</button>
+      </div>
+
+      <!-- Vista: Nuevo Juego -->
+      <div id="view-new-game" class="view">
+        <button class="back-btn" onclick="showView('main')">&#8592; Volver</button>
+        <label class="field-label">Nickname</label>
+        <input class="text-input" type="text" placeholder="Ingresa tu nombre..." maxlength="20" />
+        <p class="chars-label">Elige tu personaje</p>
+        <div class="chars-grid">
+          <div class="char-card selected" onclick="selectChar(this)">
+            <div class="char-icon">&#9760;</div>
+            <span class="char-name">Personaje 1</span>
+          </div>
+          <div class="char-card" onclick="selectChar(this)">
+            <div class="char-icon">&#9765;</div>
+            <span class="char-name">Personaje 2</span>
+          </div>
+          <div class="char-card" onclick="selectChar(this)">
+            <div class="char-icon">&#9968;</div>
+            <span class="char-name">Personaje 3</span>
+          </div>
+          <div class="char-card" onclick="selectChar(this)">
+            <div class="char-icon">&#9876;</div>
+            <span class="char-name">Personaje 4</span>
+          </div>
+        </div>
+        <button class="menu-btn" style="margin-top: 1.5rem;">Comenzar</button>
+      </div>
+
+      <!-- Vista: Créditos -->
+      <div id="view-credits" class="view">
+        <button class="back-btn" onclick="showView('main')">&#8592; Volver</button>
+        <div class="credits-box">
+          <p class="credits-heading">Desarrolladores</p>
+          <p class="credit-name">Lopez, Neyshany</p>
+          <p class="credit-name">Martinez, Miguel</p>
+          <p class="credit-name">Mendoza, Jorge</p>
+          <p class="credit-name">Torres, Martin</p>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+  <audio id="bg-music" loop autoplay>
+    <source src="assets/audio/soundtrack.mp3" type="audio/mpeg" />
+  </audio>
+
+  <script>
+    // ── Partículas ──
+    const canvas = document.getElementById('particles-canvas');
+    const ctx = canvas.getContext('2d');
+    let particles = [];
+
+    function resize() {
+      canvas.width  = window.innerWidth;
+      canvas.height = window.innerHeight;
+    }
+    resize();
+    window.addEventListener('resize', resize);
+
+    function randomParticle() {
+      return {
+        x:       Math.random() * canvas.width,
+        y:       Math.random() * canvas.height,
+        size:    Math.random() * 2 + 0.5,
+        speedY:  Math.random() * 0.4 + 0.1,
+        speedX:  (Math.random() - 0.5) * 0.3,
+        opacity: Math.random() * 0.5 + 0.1
+      };
+    }
+
+    for (let i = 0; i < 80; i++) particles.push(randomParticle());
+
+    function animateParticles() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      particles.forEach(p => {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255,255,255,${p.opacity})`;
+        ctx.fill();
+        p.y -= p.speedY;
+        p.x += p.speedX;
+        if (p.y < -5) { p.y = canvas.height + 5; p.x = Math.random() * canvas.width; }
+      });
+      requestAnimationFrame(animateParticles);
+    }
+    animateParticles();
+
+    // ── Menú ──
+    const music = document.getElementById('bg-music');
+    music.volume = 0.5;
+    music.play().catch(() => {});
+
+    function showView(id) {
+      document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
+      document.getElementById('view-' + id).classList.add('active');
+    }
+
+    function selectChar(el) {
+      document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
+      el.classList.add('selected');
+    }
+  </script>
+
+</body>
+</html>
