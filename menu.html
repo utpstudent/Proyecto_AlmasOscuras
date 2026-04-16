@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Almas Oscuras — Menú</title>
   <link rel="stylesheet" href="style.css" />
+  
 </head>
 <body class="screen-menu">
 
@@ -21,35 +22,64 @@
       <div id="view-main" class="view active">
         <h1 class="game-title small">Almas Oscuras</h1>
         <div class="title-divider"></div>
-        <button class="menu-btn" onclick="showView('new-game')">Nuevo Juego</button>
+        <button class="menu-btn" onclick="showView('player1')">Nuevo Juego</button>
         <button class="menu-btn" onclick="showView('credits')">Créditos</button>
       </div>
 
-      <!-- Vista: Nuevo Juego -->
-      <div id="view-new-game" class="view">
+      <!-- Vista: Jugador 1 -->
+      <div id="view-player1" class="view">
         <button class="back-btn" onclick="showView('main')">&#8592; Volver</button>
+        <p class="chars-label" style="font-size:0.85rem; color:#aaa; margin-bottom:1rem;">— Jugador 1 —</p>
         <label class="field-label">Nickname</label>
-        <input class="text-input" type="text" placeholder="Ingresa tu nombre..." maxlength="20" />
+        <input id="p1-nickname" class="text-input" type="text" placeholder="Ingresa tu nombre..." maxlength="20" />
         <p class="chars-label">Elige tu personaje</p>
         <div class="chars-grid">
-          <div class="char-card selected" onclick="selectChar(this)">
-            <div class="char-icon">&#9760;</div>
-            <span class="char-name">Personaje 1</span>
+          <div class="char-card selected" onclick="selectChar(this, 'p1')" data-id="knight">
+            <div class="char-icon knight"></div>
+            <span class="char-name">Knight</span>
           </div>
-          <div class="char-card" onclick="selectChar(this)">
-            <div class="char-icon">&#9765;</div>
-            <span class="char-name">Personaje 2</span>
+          <div class="char-card" onclick="selectChar(this, 'p1')" data-id="fire_wizard">
+            <div class="char-icon fire_wizard"></div>
+            <span class="char-name">Fire Wizard</span>
           </div>
-          <div class="char-card" onclick="selectChar(this)">
-            <div class="char-icon">&#9968;</div>
-            <span class="char-name">Personaje 3</span>
+          <div class="char-card" onclick="selectChar(this, 'p1')" data-id="lightning_mage">
+            <div class="char-icon lightning_mage"></div>
+            <span class="char-name">Lightning Mage</span>
           </div>
-          <div class="char-card" onclick="selectChar(this)">
-            <div class="char-icon">&#9876;</div>
-            <span class="char-name">Personaje 4</span>
+          <div class="char-card" onclick="selectChar(this, 'p1')" data-id="wanderer_magician">
+            <div class="char-icon wanderer_magician"></div>
+            <span class="char-name">Wanderer</span>
           </div>
         </div>
-        <button class="menu-btn" style="margin-top: 1.5rem;">Comenzar</button>
+        <button class="menu-btn" style="margin-top:1.5rem;" onclick="goToPlayer2()">Siguiente ›</button>
+      </div>
+
+      <!-- Vista: Jugador 2 -->
+      <div id="view-player2" class="view">
+        <button class="back-btn" onclick="showView('player1')">&#8592; Volver</button>
+        <p class="chars-label" style="font-size:0.85rem; color:#aaa; margin-bottom:1rem;">— Jugador 2 —</p>
+        <label class="field-label">Nickname</label>
+        <input id="p2-nickname" class="text-input" type="text" placeholder="Ingresa tu nombre..." maxlength="20" />
+        <p class="chars-label">Elige tu personaje</p>
+        <div class="chars-grid">
+          <div class="char-card selected" onclick="selectChar(this, 'p2')" data-id="knight">
+            <div class="char-icon knight"></div>
+            <span class="char-name">Knight</span>
+          </div>
+          <div class="char-card" onclick="selectChar(this, 'p2')" data-id="fire_wizard">
+            <div class="char-icon fire_wizard"></div>
+            <span class="char-name">Fire Wizard</span>
+          </div>
+          <div class="char-card" onclick="selectChar(this, 'p2')" data-id="lightning_mage">
+            <div class="char-icon lightning_mage"></div>
+            <span class="char-name">Lightning Mage</span>
+          </div>
+          <div class="char-card" onclick="selectChar(this, 'p2')" data-id="wanderer_magician">
+            <div class="char-icon wanderer_magician"></div>
+            <span class="char-name">Wanderer</span>
+          </div>
+        </div>
+        <button class="menu-btn" style="margin-top:1.5rem;" onclick="startGame()">⚔ Combatir</button>
       </div>
 
       <!-- Vista: Créditos -->
@@ -72,7 +102,7 @@
   </audio>
 
   <script>
-    // ── Partículas ──
+    // ── Partículas (igual que index.html) ──
     const canvas = document.getElementById('particles-canvas');
     const ctx = canvas.getContext('2d');
     let particles = [];
@@ -112,19 +142,45 @@
     }
     animateParticles();
 
-    // ── Menú ──
+    // ── Audio ──
     const music = document.getElementById('bg-music');
     music.volume = 0.5;
     music.play().catch(() => {});
+
+    // ── Selección de personajes ──
+    let p1Selected = 'knight';
+    let p2Selected = 'knight';
 
     function showView(id) {
       document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
       document.getElementById('view-' + id).classList.add('active');
     }
 
-    function selectChar(el) {
-      document.querySelectorAll('.char-card').forEach(c => c.classList.remove('selected'));
+    function selectChar(el, player) {
+      el.closest('.chars-grid').querySelectorAll('.char-card')
+        .forEach(c => c.classList.remove('selected'));
       el.classList.add('selected');
+      if (player === 'p1') p1Selected = el.dataset.id;
+      if (player === 'p2') p2Selected = el.dataset.id;
+    }
+
+    function goToPlayer2() {
+      const nickname = document.getElementById('p1-nickname').value.trim();
+      if (!nickname) { alert('Ingresa un nickname para el Jugador 1.'); return; }
+      showView('player2');
+    }
+
+    function startGame() {
+      const p1Nick = document.getElementById('p1-nickname').value.trim();
+      const p2Nick = document.getElementById('p2-nickname').value.trim();
+      if (!p2Nick) { alert('Ingresa un nickname para el Jugador 2.'); return; }
+
+      // Mandar los datos en la URL para que PHP los lea con $_GET
+      window.location.href = 'combat.php'
+        + '?p1_nick=' + encodeURIComponent(p1Nick)
+        + '&p1_char=' + p1Selected
+        + '&p2_nick=' + encodeURIComponent(p2Nick)
+        + '&p2_char=' + p2Selected;
     }
   </script>
 
